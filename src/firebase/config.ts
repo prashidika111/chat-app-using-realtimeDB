@@ -2,16 +2,15 @@ import { initializeApp } from "firebase/app";
 import { getDatabase, Database } from "firebase/database"; 
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCvgb4XkWFk7L1yl_DSm_SgqcCBhvzMkvI",
-  authDomain: "chat-app-c21d3.firebaseapp.com",
-  databaseURL: "https://chat-app-c21d3-default-rtdb.firebaseio.com",
-  projectId: "chat-app-c21d3",
-  storageBucket: "chat-app-c21d3.firebasestorage.app",
-  messagingSenderId: "508883095535",
-  appId: "1:508883095535:web:50b50cbdf176f8692b301a",
-  measurementId: "G-GKXBQ3YLWN"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 const app = initializeApp(firebaseConfig);
-
 export const db: Database = getDatabase(app);
