@@ -27,3 +27,9 @@ dist-ssr
 .env.local
 .env.development
 .env.production
+node_modules
+dist
+.env
+.env.local
+firebase-debug.log
+*.tsbuildinfo
