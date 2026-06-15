@@ -1,3 +1,3 @@
 #Chat Rooms application using Firebase's RealTime Database
 This is just an advanced version of previous version of chat application that I tried building. Better UI, better data and state management. It is a chat room application in which one can either create a chat room to obtain an auto-generated chat room code which others can use to join their room. Even the usernames are auto-generated as this is merely for practice purpose only. 
-While the current version only makes it able to send texts through and no other forms of media, future updates will include ability to send images as well which would use a seperate Storage location (Firebase's Cloud Storage). Changes like storing texts in parsed JSON format instead of sending as it is will also be made.
+While the current version only makes it able to send texts through and no other forms of media, future updates will enable users to send images as well which would use a seperate Storage location (Cloudinary). 
