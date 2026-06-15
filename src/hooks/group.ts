@@ -95,7 +95,7 @@ export function group(roomId: string) {
       if (text !== "") {
         if (text.trim() !== "") {
           try {
-            await sendGroup(roomId, me.id, me.name, text);
+            await sendGroup(roomId, me.id, me.name, "text", text);
           } catch (e) {
             console.log("failed to send", e);
           }
@@ -103,6 +103,20 @@ export function group(roomId: string) {
       }
     }
   };
-
-  return { me, users, messages, send };
+  const sendImage = async (imageUrl: string) => {
+  if (me !== null) {
+    try {
+      await sendGroup(
+        roomId,
+        me.id,
+        me.name,
+        "image",
+        imageUrl
+      );
+    } catch (e) {
+      console.log("failed to send image", e);
+    }
+  }
+};
+  return { me, users, messages, send, sendImage };
 }

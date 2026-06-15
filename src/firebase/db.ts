@@ -1,4 +1,17 @@
-import { ref, push, set, onValue, onChildAdded, off, query, orderByChild, limitToLast, onDisconnect, get, serverTimestamp } from "firebase/database";
+import {
+  ref,
+  push,
+  set,
+  onValue,
+  onChildAdded,
+  off,
+  query,
+  orderByChild,
+  limitToLast,
+  onDisconnect,
+  get,
+  serverTimestamp,
+} from "firebase/database";
 import { db } from "./config";
 import type { Message } from "@/types/msg";
 import type { User } from "@/types/person";
@@ -34,7 +47,7 @@ export async function join(roomId: string, user: User) {
     joinedAt: user.joinedAt,
     online: true,
   };
-  
+
   await set(userRef, userData);
 }
 
@@ -47,7 +60,7 @@ export async function leave(roomId: string, userId: string) {
 export function listenUsers(roomId: string, callback: (users: User[]) => void) {
   const path = "rooms/" + roomId + "/users";
   const usersRef = ref(db, path);
-  
+
   const unsubscribe = onValue(usersRef, (snapshot) => {
     const data = snapshot.val();
     if (data === null || data === undefined) {
@@ -62,11 +75,17 @@ export function listenUsers(roomId: string, callback: (users: User[]) => void) {
       callback(usersList);
     }
   });
-  return function() {
+  return function () {
     off(usersRef, "value", unsubscribe);
   };
 }
-export async function sendGroup(roomId: string, senderId: string, senderName: string, text: string) {
+export async function sendGroup(
+  roomId: string,
+  senderId: string,
+  senderName: string,
+  type: "text" | "image",
+  content: string,
+) {
   const path = "rooms/" + roomId + "/messages";
   const messagesRef = ref(db, path);
   const newMsgRef = push(messagesRef);
@@ -74,18 +93,26 @@ export async function sendGroup(roomId: string, senderId: string, senderName: st
   if (theKey !== null) {
     const messageData = {
       id: theKey,
-      senderId: senderId,
-      senderName: senderName,
-      text: text,
+      senderId,
+      senderName,
+      type,
+      content,
       timestamp: serverTimestamp(),
     };
     await set(newMsgRef, messageData);
   }
 }
-export function listenGroup(roomId: string, callback: (message: Message) => void) {
+export function listenGroup(
+  roomId: string,
+  callback: (message: Message) => void,
+) {
   const path = "rooms/" + roomId + "/messages";
   const messagesRef = ref(db, path);
-  const recentQuery = query(messagesRef, orderByChild("timestamp"), limitToLast(100));
+  const recentQuery = query(
+    messagesRef,
+    orderByChild("timestamp"),
+    limitToLast(100),
+  );
   const unsubscribe = onChildAdded(recentQuery, (snapshot) => {
     const msg = snapshot.val() as Message;
     let ts = msg.timestamp;
@@ -96,13 +123,14 @@ export function listenGroup(roomId: string, callback: (message: Message) => void
       id: msg.id,
       senderId: msg.senderId,
       senderName: msg.senderName,
-      text: msg.text,
-      timestamp: ts
+      type: msg.type,
+      content: msg.content,
+      timestamp: ts,
     };
     callback(newMessage);
   });
-  
-  return function() {
+
+  return function () {
     off(recentQuery, "child_added", unsubscribe);
   };
 }
@@ -120,29 +148,48 @@ export function getKey(userId1: string, userId2: string) {
   return first + "_" + second;
 }
 
-export async function sendPrivate(roomId: string, conversationKey: string, senderId: string, senderName: string, text: string) {
+export async function sendPrivate(
+  roomId: string,
+  conversationKey: string,
+  senderId: string,
+  senderName: string,
+  type: "text" | "image",
+  content: string,
+) {
   const path = "rooms/" + roomId + "/privateMessages/" + conversationKey;
+
   const messagesRef = ref(db, path);
   const newMsgRef = push(messagesRef);
-  
+
   const theKey = newMsgRef.key;
+
   if (theKey !== null) {
     const messageData = {
       id: theKey,
-      senderId: senderId,
-      senderName: senderName,
-      text: text,
+      senderId,
+      senderName,
+      type,
+      content,
       timestamp: serverTimestamp(),
     };
+
     await set(newMsgRef, messageData);
   }
 }
 
-export function listenPrivate(roomId: string, conversationKey: string, callback: (message: Message) => void) {
+export function listenPrivate(
+  roomId: string,
+  conversationKey: string,
+  callback: (message: Message) => void,
+) {
   const path = "rooms/" + roomId + "/privateMessages/" + conversationKey;
   const messagesRef = ref(db, path);
-  const recentQuery = query(messagesRef, orderByChild("timestamp"), limitToLast(100));
-  
+  const recentQuery = query(
+    messagesRef,
+    orderByChild("timestamp"),
+    limitToLast(100),
+  );
+
   const unsubscribe = onChildAdded(recentQuery, (snapshot) => {
     const msg = snapshot.val() as Message;
     let ts = msg.timestamp;
@@ -153,13 +200,14 @@ export function listenPrivate(roomId: string, conversationKey: string, callback:
       id: msg.id,
       senderId: msg.senderId,
       senderName: msg.senderName,
-      text: msg.text,
-      timestamp: ts
+      type: msg.type,
+      content: msg.content,
+      timestamp: ts,
     };
     callback(newMessage);
   });
-  
-  return function() {
+
+  return function () {
     off(recentQuery, "child_added", unsubscribe);
   };
 }

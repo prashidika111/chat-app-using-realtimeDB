@@ -2,6 +2,7 @@ export interface Message {
   id: string;
   senderId: string;
   senderName: string;
-  text: string;
+  type: "text" | "image";
+  content: string;
   timestamp: number;
-}
+}

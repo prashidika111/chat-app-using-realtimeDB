@@ -47,13 +47,27 @@ export function priv(roomId: string, currentUserId: string, currentUserName: str
       t = t.trim();
       if (t !== "") {
         try {
-          await sendPrivate(roomId, conversationKey, currentUserId, currentUserName, t);
+          await sendPrivate(roomId, conversationKey, currentUserId, currentUserName, "text", t);
         } catch (e) {
           console.log("error", e);
         }
       }
     }
   };
+  const sendImage = async (imageUrl: string) => {
+  try {
+    await sendPrivate(
+      roomId,
+      conversationKey,
+      currentUserId,
+      currentUserName,
+      "image",
+      imageUrl
+    );
+  } catch (e) {
+    console.log("error", e);
+  }
+};
 
-  return { messages, send };
+  return { messages, send, sendImage };
 }

@@ -30,7 +30,7 @@ function RoomPage() {
     });
   }, [roomId, navigate]);
 
-  const { me, users, messages: groupMsgs, send: sendGroupMsg } = group(roomId);
+  const { me, users, messages: groupMsgs, send: sendGroupMsg, sendImage: sendGroupImage} = group(roomId);
 
   let isPrivate = false;
   if (tab.type === 'private') {
@@ -60,7 +60,7 @@ function RoomPage() {
 
   const unreadCounts = useUnread(roomId, myId, users, tab);
 
-  const { messages: privateMsgs, send: sendPrivateMsg } = priv(
+  const { messages: privateMsgs, send: sendPrivateMsg, sendImage: sendPrivateImage } = priv(
     roomId,
     myId,
     myName,
@@ -85,6 +85,12 @@ function RoomPage() {
   if (isPrivate === true) {
     sendFn = sendPrivateMsg;
   }
+
+  let sendImageFn = sendGroupImage;
+
+if (isPrivate === true) {
+  sendImageFn = sendPrivateImage;
+}
   
   let titleStr = 'Group Chat';
   if (isPrivate === true) {
@@ -151,6 +157,7 @@ function RoomPage() {
           messages={currentMsgs}
           currentUserId={myId}
           onSendMessage={sendFn}
+          onSendImage={sendImageFn}
           isGroupChat={!isPrivate}
         />
       </div>

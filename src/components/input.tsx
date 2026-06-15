@@ -1,52 +1,80 @@
-import { useState } from "react";
-import { SendHorizontal } from "lucide-react";
+import { useState, useRef } from "react";
+import { SendHorizontal, ImagePlus } from "lucide-react";
 
 interface MessageInputProps {
   onSend: (text: string) => Promise<void>;
+  onImageSelect?: (file: File) => Promise<void>;
   placeholder?: string;
   disabled?: boolean;
 }
 
-export function InputBox({ onSend, placeholder = "Type a message…", disabled = false }: MessageInputProps) {
+export function InputBox({
+  onSend,
+  onImageSelect,
+  placeholder = "Type a message…",
+  disabled = false,
+}: MessageInputProps) {
   const [text, setText] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const hasText = text.trim() !== "";
+  const hasImage = selectedImage !== null;
+
+  const btnDisabled = (!hasText && !hasImage) || isSending || disabled;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    let canSend = true;
-    if (text.trim() === "") {
-      canSend = false;
-    }
-    if (isSending === true) {
-      canSend = false;
-    }
-    if (disabled === true) {
-      canSend = false;
+
+    const canSend = (hasText || hasImage) && !isSending && !disabled;
+
+    if (!canSend) {
+      return;
     }
 
-    if (canSend === true) {
-      try {
-        setIsSending(true);
+    try {
+      setIsSending(true);
+
+      if (selectedImage && onImageSelect) {
+        await onImageSelect(selectedImage);
+        window.dispatchEvent(new CustomEvent("chat-send"));
+        setSelectedImage(null);
+      }
+
+      if (hasText) {
         await onSend(text);
         setText("");
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setIsSending(false);
       }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsSending(false);
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      if (e.shiftKey === false) {
-        e.preventDefault();
-        handleSubmit(e);
-      }
+    if (e.key === "Enter" && e.shiftKey === false) {
+      e.preventDefault();
+      handleSubmit(e);
     }
   };
 
-  const btnDisabled = text.trim() === "" || isSending || disabled;
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    console.log("Selected file:");
+    console.log(file);
+
+    setSelectedImage(file);
+
+    e.target.value = "";
+  };
 
   return (
     <form
@@ -64,6 +92,18 @@ export function InputBox({ onSend, placeholder = "Type a message…", disabled =
         e.currentTarget.style.borderColor = "oklch(0.86 0.02 75)";
       }}
     >
+      {selectedImage && (
+        <div
+          className="px-3 py-1 text-xs rounded-lg shrink-0"
+          style={{
+            background: "oklch(0.92 0.02 75)",
+            color: "oklch(0.40 0.03 60)",
+          }}
+        >
+          📷 {selectedImage.name}
+        </div>
+      )}
+
       <input
         type="text"
         value={text}
@@ -75,6 +115,27 @@ export function InputBox({ onSend, placeholder = "Type a message…", disabled =
         className="flex-1 bg-transparent px-3 py-2 text-sm focus:outline-none disabled:opacity-50"
         style={{ color: "oklch(0.28 0.04 55)" }}
       />
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleImageChange}
+      />
+
+      <button
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        className="shrink-0 h-9 w-9 rounded-xl flex items-center justify-center"
+        style={{
+          background: "oklch(0.92 0.01 75)",
+          color: "oklch(0.45 0.03 60)",
+        }}
+      >
+        <ImagePlus className="w-4 h-4" />
+      </button>
+
       <button
         type="submit"
         disabled={btnDisabled}

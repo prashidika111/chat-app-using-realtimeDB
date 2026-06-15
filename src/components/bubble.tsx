@@ -1,13 +1,20 @@
 import { Pic } from "./pic";
 import { cn } from "@/lib/utils";
 
-function letters(name: string): string {
+function letters(name: string): string 
+{
   if (!name) return "";
-  return name.split(" ").map((word) => word[0]).join("").toUpperCase();
+  return name
+    .split(" ")
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase();
 }
 
-interface MessageBubbleProps {
-  text: string;
+interface MessageBubbleProps 
+{
+  type: "text" | "image";
+  content: string;
   senderName: string;
   timestamp: number;
   isOwnMessage: boolean;
@@ -15,11 +22,12 @@ interface MessageBubbleProps {
 }
 
 export function Bubble({
-  text,
+  type,
+  content,
   senderName,
   timestamp,
   isOwnMessage,
-  showAvatar = true
+  showAvatar = true,
 }: MessageBubbleProps) {
   let timeString = "";
   const d = new Date(timestamp);
@@ -43,7 +51,6 @@ export function Bubble({
   }
   timeString = hours + ":" + minsStr + " " + ampm;
 
-  // Warm terracotta for own messages, soft parchment for others
   const ownBubbleStyle = {
     background: "oklch(0.62 0.14 42)",
     color: "oklch(0.98 0.01 75)",
@@ -57,8 +64,12 @@ export function Bubble({
   };
 
   return (
-    <div className={cn("flex w-full animate-in fade-in slide-in-from-bottom-2 duration-200", isOwnMessage ? "justify-end" : "justify-start")}>
-
+    <div
+      className={cn(
+        "flex w-full animate-in fade-in slide-in-from-bottom-2 duration-200",
+        isOwnMessage ? "justify-end" : "justify-start",
+      )}
+    >
       {!isOwnMessage && showAvatar && (
         <div className="flex-shrink-0 mt-auto mr-2">
           <Pic
@@ -70,13 +81,19 @@ export function Bubble({
         </div>
       )}
 
-      {!isOwnMessage && !showAvatar && (
-        <div className="w-8 mr-2" />
-      )}
+      {!isOwnMessage && !showAvatar && <div className="w-8 mr-2" />}
 
-      <div className={cn("flex flex-col max-w-[72%]", isOwnMessage ? "items-end" : "items-start")}>
+      <div
+        className={cn(
+          "flex flex-col max-w-[72%]",
+          isOwnMessage ? "items-end" : "items-start",
+        )}
+      >
         {!isOwnMessage && showAvatar && (
-          <span className="text-xs font-medium mb-1 ml-1" style={{ color: "oklch(0.52 0.04 55)" }}>
+          <span
+            className="text-xs font-medium mb-1 ml-1"
+            style={{ color: "oklch(0.52 0.04 55)" }}
+          >
             {senderName}
           </span>
         )}
@@ -85,11 +102,22 @@ export function Bubble({
           className="px-4 py-2.5 text-[15px] leading-relaxed break-words"
           style={isOwnMessage ? ownBubbleStyle : otherBubbleStyle}
         >
-          {text}
+          {type === "text" ? (
+            content
+          ) : (
+            <img
+              src={content}
+              alt="chat image"
+              className="max-w-[250px] rounded-lg"
+            />
+          )}
         </div>
 
         <span
-          className={cn("text-[10px] mt-1 select-none", isOwnMessage ? "mr-1" : "ml-1")}
+          className={cn(
+            "text-[10px] mt-1 select-none",
+            isOwnMessage ? "mr-1" : "ml-1",
+          )}
           style={{ color: "oklch(0.65 0.02 65)" }}
         >
           {timeString}

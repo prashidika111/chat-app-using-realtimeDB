@@ -40,7 +40,6 @@ export function useUnread(roomId: string, currentUserId: string, users: User[], 
     users.forEach(user => {
       if (user.id === currentUserId) return;
       const conversationKey = getKey(currentUserId, user.id);
-      
       const unsub = listenPrivate(roomId, conversationKey, (msg) => {
         if (msg.timestamp < startTime) return;
         if (msg.senderId === currentUserId) return; 
